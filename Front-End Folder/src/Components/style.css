@@ -1,0 +1,175 @@
+
+.loginPage {
+    background: 
+      linear-gradient(to right, #172985, #000421),
+      url('https://images.pexels.com/photos/7130491/pexels-photo-7130491.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260');
+      
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  
+
+  .loginForm {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    color: #fff;
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+  }
+
+  h2 {
+    color: #fff;
+  }
+  
+  button {
+    font-weight: bold;
+    transition: transform 0.3s ease;
+  }
+  
+  button:hover {
+    transform: translateY(-5px);
+  }
+  
+  button:focus {
+    outline: none;
+  }
+
+
+/*animation */
+.animate-fly-in-left{
+  animation: flyInLeft 0.6s ease-in forwards;
+}
+
+@keyframes flyInLeft {
+  0% {
+    transform:translateX(-100%);
+    opacity: 0;
+  }
+  100%{
+    transform: translateX(0);
+    opacity:1;
+  }
+}
+.animate-fly-in-right{
+  animation: flyInRight 0.6s ease-in forwards;
+
+}
+@keyframes flyInRight{
+  0%{
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100%{
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/*-----------------------------------background with animantion-----------------------------------*/
+
+
+.background-lines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0; /* behind everything else */
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Horizontal lines */
+.line {
+  position: absolute;
+  width: 200%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.967);
+}
+
+/* Individual vertical line */
+.vLine {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: rgb(255, 255, 255);
+}
+
+.vLineScroller {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 200%;
+  display: flex;
+  animation: scrollLines 10s linear infinite;
+}
+
+@keyframes scrollLines {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+
+
+ul li :hover {
+    background-color: gray;
+}
+
+.employee_image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.emp_det_image {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+}
+.header{
+background:  linear-gradient(to right, #172985, #000421),
+url('https://images.pexels.com/photos/7130491/pexels-photo-7130491.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260');
+color:#fff;
+}
+.navbar{
+  background:  linear-gradient(to bottom, #172985, #000421),
+url('https://images.pexels.com/photos/7130491/pexels-photo-7130491.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260');
+color:#fff;
+}
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+
+.card-hover:hover {
+  transform: scale(1.05); /* Slight zoom effect */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+}
+.card{
+  
+  color: rgb(0, 0, 0);
+  background-color: rgba(255, 255, 255, 0.45);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.603);
+  box-shadow: 0 0 10px 1px rgba(0,0,0,0.25);
+
+  backdrop-filter: blur(15px);
+}

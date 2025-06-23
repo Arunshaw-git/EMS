@@ -1,0 +1,269 @@
+Here is the comprehensive documentation for your EMS (Employee Monitoring System) web application — including the new SEMS features (Screen Monitoring, USB Detection, PrintScreen Detection, Unauthorized Website Monitoring), and smart screenshot frequency + admin notification system.
+
+
+---
+
+🔷 EMPLOYEE MONITORING SYSTEM (EMS) — DOCUMENTATION
+
+✅ OVERVIEW:
+
+A full-stack MERN web application designed to:
+
+Manage employees
+
+Track tasks
+
+Monitor activity for productivity and security
+
+Provide real-time monitoring features
+
+
+
+---
+
+🔧 TECHNOLOGY STACK
+
+Layer	Technology Used
+
+Frontend	React.js
+Backend	Node.js, Express.js
+Database	MySQL
+Authentication	JWT (no email-based auth yet)
+Monitoring Agent	Python scripts run on employee machines
+File Upload & Cloud	Google Drive API
+
+
+
+---
+
+🔹 CORE EMS FEATURES
+
+1. Authentication System
+
+Admin and employee login (via role-based routing).
+
+No email/password verification, only role and ID-based redirection.
+
+
+2. Dashboard System
+
+Admin has access to dashboard for:
+
+Viewing all employees
+
+Assigning tasks
+
+Monitoring updates (task completions, activity)
+
+
+Employees have:
+
+Personalized dashboard
+
+Task list (view + add)
+
+HRs can assign tasks to others
+
+
+
+3. Task Assignment Flow
+
+HR can assign tasks to other employees.
+
+Uses React Router to manage /employee_detail/:id/assign pages.
+
+Tasks are stored in MySQL tasks table.
+
+Task status (complete/incomplete) tracked with checkbox.
+
+
+
+---
+
+🔹 NEWLY ADDED SEMS FEATURES
+
+To enhance security and monitor employee behavior, we added a Python-based system that integrates with the EMS app backend and runs as a background agent on the employee's computer.
+
+
+---
+
+📸 1. SCREEN MONITORING (SEMS)
+
+🔁 Frequency
+
+Default screenshot: Every 5 minutes
+
+If suspicious behavior is detected (USB plugin, PrintScreen, Forbidden website):
+
+📸 Screenshot frequency increases to every 30 seconds for 5 minutes
+
+🛑 Admin receives a real-time notification in the dashboard
+
+
+
+🧠 How it works:
+
+pyautogui captures screenshot
+
+Google Drive API uploads it to a pre-configured drive folder (per user)
+
+Screenshot metadata logged and optionally sent to backend
+
+
+
+---
+
+🔌 2. USB DETECTION
+
+Monitors for any new USB device mounted
+
+Triggers alert
+
+Increases screenshot frequency temporarily
+
+
+import psutil
+
+def detect_usb():
+    for device in psutil.disk_partitions():
+        if 'removable' in device.opts:
+            return True
+    return False
+
+
+---
+
+🖼️ 3. PRINTSCREEN DETECTION
+
+Uses pynput to listen to keyboard events
+
+Detects if Print Screen (PrtSc) key is pressed
+
+Triggers screenshot + alert
+
+
+
+---
+
+🌐 4. UNAUTHORIZED WEBSITE DETECTION
+
+Uses watchdog or system APIs to check active browser tabs or window titles
+
+Forbidden list includes:
+
+facebook.com
+
+instagram.com
+
+youtube.com
+
+freefire.com, valorant.com etc.
+
+
+
+
+---
+
+⚠️ If any of the above 3 are detected:
+
+def suspicious_activity_detected():
+    # PrintScreen, USB, Forbidden website
+    increase_screenshot_frequency()
+    notify_admin()
+
+
+---
+
+🔔 5. ADMIN NOTIFICATION SYSTEM
+
+Admin dashboard will show:
+
+Suspicious activity alert log
+
+List of recent alerts: who triggered it, when, and what triggered it
+
+
+(Optionally) Email notification or in-app notification for real-time tracking
+
+
+
+---
+
+🗂️ FILE STRUCTURE (PYTHON AGENT)
+
+/agent
+│
+├── main.py                  # Entry script
+├── drive_upload.py          # Uploads files to Google Drive
+├── screenshot.py            # Uses pyautogui to take screenshots
+├── monitor_usb.py           # USB detection logic
+├── detect_printscreen.py    # Keyboard hook
+├── website_checker.py       # Browser tab checker
+├── config.json              # Google API credentials + settings
+└── logs/
+    └── activity_log.txt
+
+
+---
+
+🔑 GOOGLE DRIVE SETUP (1-time)
+
+1. Go to Google Cloud Console.
+
+
+2. Enable Google Drive API.
+
+
+3. Create OAuth consent screen (internal).
+
+
+4. Download credentials.json.
+
+
+5. Share Drive folder with your service account if needed.
+
+
+
+
+---
+
+📦 PYTHON DEPENDENCIES
+
+pip install pyautogui pynput psutil schedule watchdog google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
+
+---
+
+🔄 RUNNING THE AGENT
+
+Put the script inside the employee’s machine and run on startup using:
+
+Windows: Task Scheduler
+
+Linux: Systemd or cron
+
+Mac: launchd
+
+
+python3 agent/main.py
+
+
+---
+
+📘 FUTURE IMPROVEMENTS
+
+Employee alert before screenshot
+
+Option to turn off camera/mic access by policy
+
+Email verification with nodemailer
+
+Use WebSocket for live alert push
+
+
+
+---
+
+If you'd like, I can generate a PDF document of this entire documentation or prepare backend APIs to receive screenshot logs and suspicious events.
+
+Would you like that next?
