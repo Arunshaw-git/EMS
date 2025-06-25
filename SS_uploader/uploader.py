@@ -39,7 +39,7 @@ def setup_config_info():
 
         emp = res.json()
 
-        with open('sems_config.json', 'w') as f:
+        with open(config_path, 'w') as f:
             json.dump(emp, f)
 
         print(f"✅ Welcome {emp['name']}! Your EMS ID is {emp['id']}.")
@@ -95,6 +95,7 @@ def take_screenshot_and_upload():
     file_path = os.path.join(SCRIPT_DIR, filename)
 
     pyautogui.screenshot(file_path)
+    time.sleep(0.3)
     try:
         url = upload_file_to_drive(service, file_path)
         print(f"[{now.strftime('%H:%M:%S')}] ✅ Uploaded: {url}")

@@ -44,8 +44,8 @@ router.get("/detail/:id", (req, res) => {
 });
 
 router.get("/detail/by-name/:name", (req, res) => {
-  const name = req.params.name.trim();
-  const sql = "SELECT * FROM employee where name = ?";
+  const name = req.params.name;
+  const sql = "SELECT * FROM employee where LOWER(name) = LOWER(?)";
 
   con.query(sql, [name], (err, result) => {
     if (err) {
@@ -151,6 +151,7 @@ router.post("/stop-sems", (req, res) => {
     process.kill(pythonProcess.pid); // Kill the process
     pythonProcess = null;
     res.status(200).json({ Status: true, message: "Python script stopped." });
+    console.log("🔴 SM is stopped")
   } catch (err) {
     console.error("Failed to stop script:", err);
     res.status(500).json({ Status: false, error: "Failed to stop script" });
@@ -279,6 +280,7 @@ router.post("/stop-usb", (req, res) => {
     process.kill(usbProcess.pid);
     usbProcess = null;
     res.status(200).json({ Status: true, message: "USB script stopped" });
+    console.log("🔴 USB script stopped")
   } catch (err) {
     console.error("Failed to stop USB script:", err);
     res.status(500).json({ Status: false, error: "Failed to stop USB script" });
