@@ -288,7 +288,8 @@ router.post("/stop-usb", (req, res) => {
 });
 
 router.post("/notify-suspicious", async (req, res) => {
-  const { employee_id, event, timestamp } = req.body;
+  const { employee_id, event } = req.body;
+  const timestamp = new Date();
 
   try {
     // Save to DB
@@ -302,7 +303,7 @@ router.post("/notify-suspicious", async (req, res) => {
     io.emit("suspicious-activity", {
       employee_id,
       event,
-      timestamp: new Date()
+      timestamp
     });
 
     res.status(200).json({ success: true });

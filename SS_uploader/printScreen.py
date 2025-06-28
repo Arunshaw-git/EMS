@@ -6,10 +6,12 @@ import requests
 import json
 import signal
 import sys
+import time
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaIoBaseUpload
 from google.auth.transport.requests import Request
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
@@ -52,46 +54,70 @@ def authenticate_drive():
 def upload_screenshot_and_log():
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     SCREENSHOT_DIR = os.path.join(SCRIPT_DIR, 'screenshots')
-
-    # Ensure the 'screenshots' directory exists
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
     now = datetime.datetime.now()
     filename = f"printScreen_{EMPLOYEE_NAME}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.png"
     file_path = os.path.join(SCREENSHOT_DIR, filename)
 
-    pyautogui.screenshot(file_path)
-    service = authenticate_drive()
-
-    file_metadata = {'name': filename}
-    media = MediaFileUpload(file_path, resumable=True)
-    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    file_url = f"https://drive.google.com/file/d/{file.get('id')}/view"
-
     try:
-        res = requests.post(f"{API_BASE_URL}/auth/log_printScreen", json={
-            "employee_id": EMPLOYEE_ID,
-            "url": file_url,
-            "timestamp": now.strftime('%Y-%m-%d %H:%M:%S')
-        })
-        if res.status_code == 200:
-            print(f"[LOGGED] Screenshot URL: {file_url}")
-            notify_admin(EMPLOYEE_ID, "PrintScreen Used")
-    except Exception as e:
-        print(f"[ERROR] {e}")
-    finally:
+        # Take screenshot
+        image = pyautogui.screenshot()
+        image.save(file_path)
+        del image
+        # Authenticate and upload
+        service = authenticate_drive()
+        with open(file_path, "rb") as f:
+            media = MediaIoBaseUpload(f, mimetype="image/png")
+            file_metadata = {'name': filename}
+            uploaded_file = service.files().create(
+                body=file_metadata,
+                media_body=media,
+                fields='id'
+            ).execute()
+
+        file_url = f"https://drive.google.com/file/d/{uploaded_file.get('id')}/view"
+
+        # Log to EMS
         try:
-            media._fd.close()  # Ensure file handle is closed
-            os.remove(file_path)
+            res = requests.post(f"{API_BASE_URL}/auth/log_printScreen", json={
+                "employee_id": EMPLOYEE_ID,
+                "url": file_url,
+                "timestamp": now.strftime('%Y-%m-%d %H:%M:%S')
+            })
+
+            if res.status_code == 200:
+                print(f"[LOGGED] Screenshot URL: {file_url}")
+                notify_admin(EMPLOYEE_ID, "PrintScreen Used")
+            else:
+                print(f"[LOG ERROR] {res.status_code}: {res.text}")
+
         except Exception as e:
-            print(f"[ERROR] Failed to delete file: {e}")
+            print(f"[LOG EXCEPTION] {e}")
+
+    except Exception as e:
+        print(f"[UPLOAD ERROR] {e}")
+
+    finally:
+        # Safe file deletion with retry
+        for i in range(5):
+            try:
+                os.remove(file_path)
+                print(f"🗑️ Deleted: {file_path}")
+                break
+            except PermissionError as e:
+                print(f"[DELETE RETRY {i+1}] File in use: {e}")
+                time.sleep(1)
+        else:
+            print(f"[WARN] Could not delete: {file_path}")
 
 
 def notify_admin(employee_id, event):
+
     try:
         res = requests.post(f"{API_BASE_URL}/employee/notify-suspicious", json={
             "employee_id": employee_id,
-            "event": event
+            "event": event,
         })
         if res.status_code == 200:
             print(f"[NOTIFY] {event} alert sent for Employee ID {employee_id}")
