@@ -251,7 +251,7 @@ router.post("/log_usb", async (req, res) => {
   }
 });
 
-router.get("/usb_logs/:id", async (req,res)=>{
+router.get("/usb_logs/:id", async (req, res) => {
   const id = req.params.id
   if (!id)
     return res
@@ -259,13 +259,13 @@ router.get("/usb_logs/:id", async (req,res)=>{
       .json({ Status: false, error: "Missing employee ID" });
 
   const sql = `Select * from usb_logs WHERE employee_id = ?`
-  
+
   con.query(sql, [id], (err, result) => {
-    if (err) { 
+    if (err) {
       console.log("Fetching PrintScreen logs error: ", err);
       return res.status(500).json("Error in fetching Printscreen logs: ", err.message);
     }
-    res.json({status:true ,data: result})
+    res.json({ status: true, data: result })
   });
 })
 
@@ -273,24 +273,58 @@ router.get("/usb_logs/:id", async (req,res)=>{
 // GET all notifications
 router.get("/notifications", async (req, res) => {
   const rows = await new Promise((resolve, reject) => {
-  con.query(
-    `SELECT n.id, n.employee_id, e.name AS employee_name, n.event, n.timestamp, n.seen
+    con.query(
+      `SELECT n.id, n.employee_id, e.name AS employee_name, n.event, n.timestamp, n.seen
      FROM notifications n
      JOIN employee e ON n.employee_id = e.id
      ORDER BY n.timestamp DESC`,
-    (err, result) => {
-      if (err) return reject(err);
-      resolve(result);
-    }
-  );
-});
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
+  });
   res.json(rows);
 });
 
 // PATCH to mark all as seen
 router.patch("/notifications/mark-seen", async (req, res) => {
-  await con.query("UPDATE notifications SET seen = TRUE");
+  con.query("UPDATE notifications SET seen = TRUE");
   res.json({ success: true });
+});
+
+router.post("/start_social_media_session", async (req, res) => {
+  const session = req.body
+  const sql = `INSERT INTO social_media_session (employee_id,domain, start_time,end_time) VALUES (?,?,?,?)`
+  con.query(sql, [session.employee_id, session.domain, session.start_time,session.end_time], (err, result) => {
+    if (err) {
+      console.error('[DB ERROR - START SESSION]', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+
+    res.status(200).json({
+      log_id: result.insertId,
+      message: "Start session log save"
+    });
+  })
+})
+
+router.post("/end_social_media_session", async (req, res) => {
+  const { session_id, end_time } = req.body;
+
+  const sql = `UPDATE social_media_session SET end_time = ? WHERE id = ?`;
+  con.query(sql, [end_time, session_id], (err, result) => {
+    if (err) {
+      console.error('[DB ERROR - END SESSION]', err);
+      return res.status(500).json({ Status: false, message: 'Internal server error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ Status: false, message: "Session not found" });
+    }
+    res.json({ Status: true, message: "Session end time updated" });
+  })
+
 });
 
 

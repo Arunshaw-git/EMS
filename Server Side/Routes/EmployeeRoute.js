@@ -313,4 +313,67 @@ router.post("/notify-suspicious", async (req, res) => {
   }
 });
 
+const ipDetectionScriptPath = path.join(__dirname,"../../SS_uploader/ipDetection.py")
+let ipDetectionProcess = null
+
+router.post("/start-ipDetection", (req, res) => {
+  try {
+    if (ipDetectionProcess) {
+      console.log("Ipdetection already running")
+      return res
+        .status(400)
+        .json({ Status: false, message: "ip detection script already running" });
+    }
+    ipDetectionProcess = spawn(pythonExecutable, [ipDetectionScriptPath], {
+      stdio: ["ignore", "pipe", "pipe"],
+      creationFlags: 0x08000000,
+      windowsHide: true,
+    });
+
+    ipDetectionProcess.stdout.on("data", (data) => {
+      console.log(`📤 IP STDOUT: ${data.toString()}`);
+    });
+
+    ipDetectionProcess.stderr.on("data", (data) => {
+      console.error(`IP STDERR: ${data.toString()}`);
+    });
+
+    ipDetectionProcess.on("exit", (code) => {
+      console.log(`🚪 IP Detection script exited with code ${code}`);
+      ipDetectionProcess = null;
+    });
+    ipDetectionProcess.unref();
+
+    res.json({ Status: true, message: "🟢IP detecion script is runing" })
+
+
+  } catch (error) {
+    console.log("Error in starting the Ip script: ", error)
+    res.status(500).json({ Status: false, error: "Ip Script launch failed." });
+
+  }
+})
+
+router.post("/stop-ipDetection", (req, res) => {
+  if (!ipDetectionProcess) {
+    return res
+      .status(400)
+      .json({ Status: false, message: "No IP Detection script is running" });
+  }
+
+  try {
+    process.kill(ipDetectionProcess.pid);
+    ipDetectionProcess = null;
+    res.status(200).json({ Status: true, message: "🔴 IP Detection script stopped" });
+    console.log("🔴 IP Detection script stopped");
+  } catch (err) {
+    console.error("Failed to stop IP Detection script:", err);
+    res
+      .status(500)
+      .json({ Status: false, error: "Failed to stop IP Detection script" });
+  }
+});
+
+
+
 export { router as EmployeeRouter };

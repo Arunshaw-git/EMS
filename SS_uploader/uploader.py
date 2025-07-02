@@ -17,6 +17,16 @@ from google.auth.transport.requests import Request
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 API_BASE_URL = "http://localhost:3000/"  # change if deployed
 
+SESSION_FLAG_FILE = os.path.join(os.path.dirname(__file__), "session_flag.json")
+
+def is_session_active():
+    try:
+        with open(SESSION_FLAG_FILE, "r") as f:
+            data = json.load(f)
+            return data.get("active", False)
+    except Exception:
+        return False
+    
 # === Setup config.json and fetch employee info from EMS ===
 def setup_config_info():
     config_path = os.path.join(os.path.dirname(__file__), 'sems_config.json')
@@ -129,10 +139,29 @@ emp_info = get_employee_info()
 EMPLOYEE_ID = emp_info['id']
 EMPLOYEE_NAME = emp_info['name']
 
+current_interval = None
+
+def schedule_screenshot(interval_seconds):
+    global current_interval
+    if current_interval == interval_seconds:
+        return  # No change needed
+
+    schedule.clear()
+    schedule.every(interval_seconds).seconds.do(take_screenshot_and_upload)
+    current_interval = interval_seconds
+    print(f"[UPDATE] Screenshot interval set to {interval_seconds} seconds.")
+
+
 service = authenticate_drive()
-schedule.every(1).seconds.do(take_screenshot_and_upload)
+
 
 print(f"🚀 SEMS running for {EMPLOYEE_NAME} (ID: {EMPLOYEE_ID}) – Press Ctrl+C to stop.")
 while True:
+    if is_session_active():
+        schedule_screenshot(10)
+    else:
+        schedule_screenshot(30)
+
     schedule.run_pending()
     time.sleep(1)
+

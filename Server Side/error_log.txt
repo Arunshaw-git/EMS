@@ -1,0 +1,1 @@
+Command '['wscript', 'C:\\Users\\HP\\Documents\\EMS\\SS_uploader\\tshark_silent.vbs']' returned non-zero exit status 1.

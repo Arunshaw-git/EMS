@@ -1,0 +1,1 @@
+Booting sniffer on: \Device\NPF_{A19D6676-989B-47BC-92BB-DC1896C05F10}
