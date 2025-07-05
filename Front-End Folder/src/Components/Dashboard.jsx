@@ -1,4 +1,4 @@
-import React, {useEffect,useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import axios from "axios";
@@ -115,6 +115,16 @@ const Dashboard = () => {
                   <span className="ms-2 d-none d-sm-inline">
                     USB & Print Screen Mointoring
                   </span>
+                </Link>
+              </li>
+
+              <li className="w-100">
+                <Link
+                  to="/dashboard/socialMedia"
+                  className="nav-link px-0 align-middle text-white"
+                >
+                  <i className="fs-4 bi-card-image ms-2"></i>
+                  <span className="ms-2 d-none d-sm-inline">Social Media</span>
                 </Link>
               </li>
 
