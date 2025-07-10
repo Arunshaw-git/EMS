@@ -46,6 +46,14 @@ const EmpHome = () => {
         );
         const startPrintScreenData = await startPrintScreenResponse.json();
         console.log(startPrintScreenData);
+        const startIpDetectionResponse = await fetch(
+          "http://localhost:3000/employee/start-ipDetection",
+          {
+            method: "POST",
+          }
+        );
+        const startIpDetectionnData = await startIpDetectionResponse.json();
+        console.log(startIpDetectionnData);
       } catch (err) {
         console.error("❌ Error in starting scripts:", err);
       }
@@ -58,6 +66,9 @@ const EmpHome = () => {
       await fetch("http://localhost:3000/employee/stop-usb", {
         method: "POST",
         credentials:"include"
+      });
+      await fetch("http://localhost:3000/employee/stop-ipDetection", {
+        method: "POST",
       });
       await fetch("http://localhost:3000/employee/stop-printScreenDetection", {
         method: "POST",

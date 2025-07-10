@@ -143,7 +143,7 @@ current_interval = None
 
 def schedule_screenshot(interval_seconds):
     global current_interval
-    if current_interval == interval_seconds:
+    if current_interval == interval_seconds: 
         return  # No change needed
 
     schedule.clear()
@@ -158,6 +158,7 @@ service = authenticate_drive()
 print(f"🚀 SEMS running for {EMPLOYEE_NAME} (ID: {EMPLOYEE_ID}) – Press Ctrl+C to stop.")
 while True:
     if is_session_active():
+        take_screenshot_and_upload()
         schedule_screenshot(10)
     else:
         schedule_screenshot(30)

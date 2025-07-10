@@ -3,6 +3,7 @@ import con from "../utils/db.js";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import path from "path";
+import moment from "moment"; 
 
 const router = express.Router();
 
@@ -306,5 +307,43 @@ router.post("/end_social_media_session", async (req, res) => {
 
 });
 
+router.get("/social_media_logs/:id",async(req,res)=>{
+  const {id} = req.params;
+  const sql = `SELECT * from social_media_session WHERE employee_id = ?`
+  con.query(sql,[id],(err,result)=>{
+    if(err){
+      console.error(err);
+      return res.json({Status:false, message:"Database error while fetching social media session"})
+    }
+    if (result.length === 0) {
+      return res.json({ Status: false, message: "No social media session found for this employee" });
+    }
+    res.json({Status:true, data:result})
+  })
+})
+
+router.post("/:id/socialMediaSS", async (req, res) => {
+  const {id} = req.params;
+  
+  const { start_time } = req.body;
+
+  if (!start_time || !id) {
+    return res.json({ Status: false, message: "Start time and employee ID required" });
+  }
+
+  const formattedStartTime = moment(start_time).format("YYYY-MM_DD HH:mm:ss")
+  const sql = `
+    SELECT * FROM screenshot_logs
+    WHERE employee_id = ? AND timestamp BETWEEN ? AND DATE_ADD(?, INTERVAL 3 MINUTE)
+  `;
+
+  con.query(sql, [id, formattedStartTime, formattedStartTime], (err, result) => {
+    if (err) {
+      console.error("MySQL error:", err);
+      return res.json({ Status: false, message: "Query failed" });
+    }
+    return res.json({ Status: true, data: result });
+  });
+});
 
 export { router as AdminRouter };

@@ -33,6 +33,9 @@ import PrintScreenLogs from "./Components/PrintScreenLogs";
 import EmpProvider from "./Components/context/EmpProvider";
 import EmpPrivateRoute from "./Components/emp/EmpPrivateRoute";
 import Notifications from "./Components/Notifications";
+import SocialMedia from "./Components/SocialMedia";
+import SocialMediaLogs from "./Components/SocialMediaLogs";
+import SocialMediaSS from "./Components/SocialMediaSS";
 
 function App() {
   return (
@@ -90,6 +93,18 @@ function App() {
             <Route
               path="usbAndPrintScreen/printScreen_logs/:id"
               element={<PrintScreenLogs />}
+            />
+            <Route
+              path="socialMedia"
+              element={<SocialMedia/>}
+            />
+            <Route
+              path="socialMedia/socialMedia_logs/:id"
+              element={<SocialMediaLogs/>}
+            />
+            <Route
+              path="socialMedia/socialMedia_logs/:id/socialMediaSS"
+              element={<SocialMediaSS/>}
             />
           </Route>
         </Routes>
