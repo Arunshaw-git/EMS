@@ -9,7 +9,13 @@ const PrintScreenLogs = () => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/auth/printScreen_logs/${id}`);
+        const res = await fetch(
+          `http://localhost:3000/admin/printScreen_logs/${id}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
         const data = await res.json();
         if (data.Status) {
           setLogs(data.data);
@@ -34,7 +40,11 @@ const PrintScreenLogs = () => {
       {logs.length === 0 ? (
         <p>No logs found.</p>
       ) : (
-        <table border="1" cellPadding="10" style={{ width: "100%", marginTop: "20px" }}>
+        <table
+          border="1"
+          cellPadding="10"
+          style={{ width: "100%", marginTop: "20px" }}
+        >
           <thead>
             <tr>
               <th>Timestamp</th>

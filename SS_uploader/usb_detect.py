@@ -59,7 +59,7 @@ while True:
         inserted = watcher_insert(timeout_ms=1000)
         if inserted:
             now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            res = requests.post(f"{API_BASE_URL}/auth/log_usb", json={
+            res = requests.post(f"{API_BASE_URL}/admin/log_usb", json={
                 "employee_id": EMPLOYEE_ID,
                 "event": "Inserted",
                 "timestamp": now
@@ -74,7 +74,7 @@ while True:
         removed = watcher_remove(timeout_ms=1000)
         if removed:
             now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            res = requests.post(f"{API_BASE_URL}/auth/log_usb", json={
+            res = requests.post(f"{API_BASE_URL}/admin/log_usb", json={
                 "employee_id": EMPLOYEE_ID,
                 "event": "Removed",
                 "timestamp": now

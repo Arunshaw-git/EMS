@@ -11,7 +11,7 @@ const Notifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/auth/notifications", {
+      const res = await axios.get("http://localhost:3000/admin/notifications", {
         withCredentials: true,
       });
       setNotifications(res.data);
@@ -22,7 +22,7 @@ const Notifications = () => {
 
   const markAllAsSeen = async () => {
     try {
-      await axios.patch("http://localhost:3000/auth/notifications/mark-seen", {
+      await axios.patch("http://localhost:3000/admin/notifications/mark-seen", {
         withCredentials: true,
       });
     } catch (err) {

@@ -8,7 +8,7 @@ const AddCategory = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        axios.post('http://localhost:3000/auth/add_category', {category})
+        axios.post('http://localhost:3000/admin/add_category', { withCredentials: true }, {category})
         .then(result => {
             if(result.data.Status) {
                 navigate('/dashboard/category')

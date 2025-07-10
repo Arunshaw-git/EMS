@@ -4,8 +4,11 @@ import { useNavigate } from "react-router-dom";
 
 const Start = () => {
   const navigate = useNavigate();
+
   axios.defaults.withCredentials = true;
+
   useEffect(() => {
+
     axios
       .get("http://localhost:3000/verify")
       .then((result) => {
@@ -18,7 +21,7 @@ const Start = () => {
         }
       })
       .catch((err) => console.log(err));
-  }, []);
+  }, [navigate]);
 
   return (
     <>

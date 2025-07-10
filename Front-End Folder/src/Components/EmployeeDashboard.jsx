@@ -21,7 +21,7 @@ const EmployeeDashboard = () => {
 
   const handleLogout = () => {
     axios
-      .get("http://localhost:3000/employee/logout")
+      .get("http://localhost:3000/employee/logout", { withCredentials: true })
       .then((result) => {
         if (result.data.Status) {
           localStorage.removeItem("valid");
@@ -33,7 +33,7 @@ const EmployeeDashboard = () => {
 
   const getCategory = () => {
     axios
-      .get("http://localhost:3000/auth/category")
+      .get("http://localhost:3000/admin/category", { withCredentials: true })
       .then((result) => {
         if (result.data.Status) {
           setCategory(result.data.Result);

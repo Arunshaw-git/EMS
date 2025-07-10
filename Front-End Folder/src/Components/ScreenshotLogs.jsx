@@ -9,7 +9,10 @@ const ScreenshotLogs = () => {
  useEffect(() => {
   const fetchLogs = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/auth/screenshot_logs/${id}`);
+      const res = await fetch(`http://localhost:3000/admin/screenshot_logs/${id}`,{
+      method: "GET",
+      credentials: "include",
+    });
       const data = await res.json();
       if (data.Status) {
         setLogs(data.data);

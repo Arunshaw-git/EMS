@@ -80,7 +80,7 @@ def upload_screenshot_and_log():
 
         # Log to EMS
         try:
-            res = requests.post(f"{API_BASE_URL}/auth/log_printScreen", json={
+            res = requests.post(f"{API_BASE_URL}/admin/log_printScreen", json={
                 "employee_id": EMPLOYEE_ID,
                 "url": file_url,
                 "timestamp": now.strftime('%Y-%m-%d %H:%M:%S')

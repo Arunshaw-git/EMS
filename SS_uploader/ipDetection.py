@@ -91,7 +91,7 @@ def log_session_start(domain, start_time):
     }
 
     try:
-        res = requests.post("http://localhost:3000/auth/start_social_media_session", json=payload)
+        res = requests.post("http://localhost:3000/admin/start_social_media_session", json=payload)
         if res.status_code == 200:
             log_id = res.json().get("log_id")
             print(f"[SESSION STARTED] {domain} (ID: {log_id})")
@@ -113,7 +113,7 @@ def log_session_end(domain):
     }
 
     try:
-        res = requests.post("http://localhost:3000/auth/end_social_media_session", json=payload)
+        res = requests.post("http://localhost:3000/admin/end_social_media_session", json=payload)
         if res.status_code == 200:
             print(f"[SESSION ENDED] {domain} (ID: {session['session_id']})")
         else:
@@ -221,6 +221,8 @@ def start_tls_sniffer(interface_name):
 
                 # 👇 only log if it's in the watchlist
                 if root_domain in watchlist:
+                    print(f"[SESSION STARTED] {root_domain}")
+
                     session_status = update_sessions(root_domain)
                     if session_status == 'new':
                         notify(event=root_domain)

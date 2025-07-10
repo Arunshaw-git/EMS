@@ -125,7 +125,7 @@ def log_to_database( employee_id, filename, url, timestamp ):
             "url": url,
             "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S")
         }
-        res = requests.post(f"{API_BASE_URL}/auth/log_screenshot", json= payload)
+        res = requests.post(f"{API_BASE_URL}/admin/log_screenshot", json= payload)
         if res.status_code ==200:
             print(f"Log saved in EMS {filename} ")
         else: 

@@ -15,7 +15,7 @@ const EditEmployee = () => {
       const navigate = useNavigate()
 
       useEffect(()=> {
-        axios.get('http://localhost:3000/auth/category')
+        axios.get('http://localhost:3000/admin/category', { withCredentials: true })
         .then(result => {
             if(result.data.Status) {
                 setCategory(result.data.Result);
@@ -24,7 +24,7 @@ const EditEmployee = () => {
             }
         }).catch(err => console.log(err))
 
-        axios.get('http://localhost:3000/auth/employee/'+id)
+        axios.get('http://localhost:3000/admin/employee/'+id, { withCredentials: true })
         .then(result => {
             setEmployee({
                 ...employee,
@@ -39,7 +39,7 @@ const EditEmployee = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        axios.put('http://localhost:3000/auth/edit_employee/'+id, employee)
+        axios.put('http://localhost:3000/admin/edit_employee/'+id, { withCredentials: true }, employee)
         .then(result => {
             if(result.data.Status) {
                 navigate('/dashboard/employee')

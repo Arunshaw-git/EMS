@@ -7,7 +7,7 @@ const Category = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/auth/category")
+      .get("http://localhost:3000/admin/category", { withCredentials: true })
       .then((result) => {
         if (result.data.Status) {
           setCategory(result.data.Result);

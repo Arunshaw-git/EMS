@@ -10,7 +10,7 @@ const EmpAssignTasks = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch("http://localhost:3000/auth/employee", {
+        const response = await fetch("http://localhost:3000/admin/employee", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -29,7 +29,7 @@ const EmpAssignTasks = () => {
     fetchEmployees();
 
     const getCategory = async () => {
-      const res = await fetch("http://localhost:3000/auth/category", {
+      const res = await fetch("http://localhost:3000/admin/category", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

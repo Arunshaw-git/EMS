@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useContext } from "react";
 import EmpContext from "./context/EmpContext";
 
@@ -81,7 +80,7 @@ const Home = () => {
               ) : (
                 <tr>
                   <td colSpan="2" className="text-center text-muted py-4">
-                    No admins found.
+                    No Employee found.
                   </td>
                 </tr>
               )}

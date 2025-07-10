@@ -17,7 +17,7 @@ const AddEmployee = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/auth/category")
+      .get("http://localhost:3000/admin/category", { withCredentials: true })
       .then((result) => {
         if (result.data.Status) {
           setCategory(result.data.Result);
@@ -40,7 +40,7 @@ const AddEmployee = () => {
     formData.append("category_id", employee.category_id);
 
     axios
-      .post("http://localhost:3000/auth/add_employee", formData)
+      .post("http://localhost:3000/admin/add_employee", { withCredentials: true },formData)
       .then((result) => {
         if (result.data.Status) {
           navigate("/dashboard/employee");

@@ -8,7 +8,7 @@ const Employee = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/auth/employee")
+      .get("http://localhost:3000/admin/employee", { withCredentials: true })
       .then((result) => {
         if (result.data.Status) {
           setEmployee(result.data.Result);
@@ -20,7 +20,7 @@ const Employee = () => {
   }, []);
   const handleDelete = (id) => {
     axios
-      .delete("http://localhost:3000/auth/delete_employee/" + id)
+      .delete("http://localhost:3000/admin/delete_employee/" + id, { withCredentials: true })
       .then((result) => {
         if (result.data.Status) {
           window.location.reload();

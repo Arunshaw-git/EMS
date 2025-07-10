@@ -8,7 +8,7 @@ const USBLogs = () => {
 
     const { id } = useParams(); // Employee ID from the route
   useEffect(() => {
-    fetch(`http://localhost:3000/auth/usb_logs/${id}`)  // Ensure this is the correct route from your backend
+    fetch(`http://localhost:3000/admin/usb_logs/${id}`)  // Ensure this is the correct route from your backend
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch logs");
         return res.json();

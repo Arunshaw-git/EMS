@@ -19,6 +19,7 @@ const EmpHome = () => {
           "http://localhost:3000/employee/start-sems",
           {
             method: "POST",
+            credentials:"include"
           }
         );
         const startSemsData = await startSemsResponse.json();
@@ -28,6 +29,7 @@ const EmpHome = () => {
           "http://localhost:3000/employee/start-usb",
           {
             method: "POST",
+            credentials:"include"
           }
         );
         const startUsbData = await startUsb.json();
@@ -39,6 +41,7 @@ const EmpHome = () => {
           "http://localhost:3000/employee/start-printScreenDetection",
           {
             method: "POST",
+            credentials:"include"
           }
         );
         const startPrintScreenData = await startPrintScreenResponse.json();
@@ -50,12 +53,15 @@ const EmpHome = () => {
 
       await fetch("http://localhost:3000/employee/stop-sems", {
         method: "POST",
+        credentials:"include"
       });
       await fetch("http://localhost:3000/employee/stop-usb", {
         method: "POST",
+        credentials:"include"
       });
       await fetch("http://localhost:3000/employee/stop-printScreenDetection", {
         method: "POST",
+        credentials:"include"
       });
       console.log("✅ All scripts stopped");
 
