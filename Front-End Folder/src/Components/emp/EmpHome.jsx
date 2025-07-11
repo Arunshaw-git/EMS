@@ -50,6 +50,7 @@ const EmpHome = () => {
           "http://localhost:3000/employee/start-ipDetection",
           {
             method: "POST",
+            credentials:"include",
           }
         );
         const startIpDetectionnData = await startIpDetectionResponse.json();

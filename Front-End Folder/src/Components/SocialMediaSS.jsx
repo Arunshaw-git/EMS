@@ -17,6 +17,7 @@ const SocialMediaSS = () => {
       try {
         const res = await fetch(`http://localhost:3000/auth/${id}/socialMediaSS`, {
           method: "POST",
+          credentials:"include",
           headers: {
             "Content-Type": "application/json"
           },
