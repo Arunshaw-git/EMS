@@ -20,8 +20,20 @@ router.post("/employee_login", (req, res) => {
             "jwt_secret_key",
             { expiresIn: "1d" }
           );
+          con.query(
+            "INSERT INTO temp_tokens (emp_id, token) VALUES (?, ?) ON DUPLICATE KEY UPDATE token = ?",
+            [result[0].id, token, token],
+            (err, result) => {
+              if (err) {
+                return res.json({
+                  loginStatus: false,
+                  Error: "Token DB error",
+                });
+              }
+            }
+          );
           res.cookie("token", token);
-          return res.json({ loginStatus: true, id: result[0].id });
+          return res.json({ loginStatus: true, token, id: result[0].id,name:result[0].name });
         }
       });
     } else {
@@ -29,4 +41,4 @@ router.post("/employee_login", (req, res) => {
     }
   });
 });
-export {router as EmployeeLogin}
+export { router as EmployeeLogin };

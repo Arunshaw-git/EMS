@@ -50,6 +50,7 @@ const EmpHome = () => {
           "http://localhost:3000/employee/start-ipDetection",
           {
             method: "POST",
+            credentials:"include"
           }
         );
         const startIpDetectionnData = await startIpDetectionResponse.json();
@@ -63,12 +64,15 @@ const EmpHome = () => {
         method: "POST",
         credentials:"include"
       });
+
       await fetch("http://localhost:3000/employee/stop-usb", {
         method: "POST",
         credentials:"include"
       });
+
       await fetch("http://localhost:3000/employee/stop-ipDetection", {
         method: "POST",
+        credentials:"include"
       });
       await fetch("http://localhost:3000/employee/stop-printScreenDetection", {
         method: "POST",

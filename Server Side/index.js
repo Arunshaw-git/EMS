@@ -21,11 +21,12 @@ const io = new Server(server, {
 });
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
+app.options('*', cors());
 app.use(express.json());
 app.use(cookieParser());
 app.set("io", io);
@@ -36,8 +37,15 @@ app.use((req, res, next) => {
 });
 
 const verifyUser = (req, res, next) => {
-  const token = req.cookies.token;
+  let token = req.cookies.token;
+  if (!token && req.headers.authorization) {
+    const bearer = req.headers.authorization;
+    if (bearer.startsWith("Bearer ")) {
+      token = bearer.split(" ")[1];
+    }
+  }
   console.log("🔐 Token received:", token);
+
 
   if (token) {
     Jwt.verify(token, "jwt_secret_key", (err, decoded) => {

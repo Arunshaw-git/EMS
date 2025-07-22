@@ -15,8 +15,9 @@ const SocialMediaSS = () => {
     
     const fetchSSLogs = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/auth/${id}/socialMediaSS`, {
+        const res = await fetch(`http://localhost:3000/admin/${id}/socialMediaSS`, {
           method: "POST",
+           credentials: "include",
           headers: {
             "Content-Type": "application/json"
           },
