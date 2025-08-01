@@ -12,6 +12,7 @@ const EmpAssignTasks = () => {
       try {
         const response = await fetch("http://localhost:3000/admin/employee", {
           method: "GET",
+          credentials:"include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -31,6 +32,7 @@ const EmpAssignTasks = () => {
     const getCategory = async () => {
       const res = await fetch("http://localhost:3000/admin/category", {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
         },
