@@ -12,7 +12,7 @@ CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'sems_config.json')
 API_BASE_URL = "http://localhost:3000"
 
 def handle_exit(sig, frame):
-    print("🛑 Gracefully shutting down USB detector...")
+    print(" Gracefully shutting down USB detector...")
     sys.exit(0)
 
 # Signal handling
@@ -21,11 +21,12 @@ signal.signal(signal.SIGINT, handle_exit)
 
 # Load employee info
 with open(CONFIG_PATH, 'r') as f:
-    emp = json.load(f)
-EMPLOYEE_ID = emp["id"]
-EMPLOYEE_NAME = emp["name"]
+    config = json.load(f)
+EMPLOYEE_ID = config["id"]
+HEADERS = {'Authorization': f'Bearer {config["token"]}'}
+#EMPLOYEE_NAME = config["name"]
 
-print("✅ USB Detection script running on Windows...")
+print("[USB] USB Detection script running on Windows...")
 
 # Setup WMI monitoring
 pythoncom.CoInitialize()
@@ -46,7 +47,7 @@ def notify_admin(employee_id, event):
         res = requests.post(f"{API_BASE_URL}/employee/notify-suspicious", json={
             "employee_id": employee_id,
             "event": f"USB {event}"
-        })
+        },headers=HEADERS)
         if res.status_code == 200:
             print(f"[NOTIFY] USB {event} alert sent for Employee ID {employee_id}")
         else:
@@ -63,8 +64,8 @@ while True:
                 "employee_id": EMPLOYEE_ID,
                 "event": "Inserted",
                 "timestamp": now
-            })
-            print(f"✅ USB Inserted at {now}")
+            },headers=HEADERS)
+            print(f"[USB] USB Inserted at {now}")
             notify_admin(EMPLOYEE_ID, "Inserted")
 
     except wmi.x_wmi_timed_out:
@@ -78,8 +79,8 @@ while True:
                 "employee_id": EMPLOYEE_ID,
                 "event": "Removed",
                 "timestamp": now
-            })
-            print(f"✅ USB Removed at {now}")
+            },headers=HEADERS)
+            print(f"[USB] USB Removed at {now}")
             notify_admin(EMPLOYEE_ID, "Removed")
 
     except wmi.x_wmi_timed_out:

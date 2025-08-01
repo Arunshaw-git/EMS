@@ -20,7 +20,7 @@ API_BASE_URL = "http://localhost:3000"
 
 
 def handle_exit(sig, frame):
-    print("🛑 Gracefully shutting down PrintScreen script...")
+    print("[PRINTSCREEN] Gracefully shutting down PrintScreen script...")
     keyboard.unhook_all()
     sys.exit(0)
 
@@ -30,9 +30,10 @@ signal.signal(signal.SIGINT, handle_exit)
 
 # Load employee info
 with open(CONFIG_PATH, 'r') as f:
-    emp = json.load(f)
-EMPLOYEE_ID = emp["id"]
-EMPLOYEE_NAME = emp["name"]
+    config = json.load(f)
+EMPLOYEE_ID = config["id"]
+#EMPLOYEE_NAME = emp["name"]
+HEADERS = {'Authorization': f'Bearer {config["token"]}'}  # Format it as Bearer token
 
 def authenticate_drive():
     creds = None
@@ -57,7 +58,7 @@ def upload_screenshot_and_log():
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
     now = datetime.datetime.now()
-    filename = f"printScreen_{EMPLOYEE_NAME}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.png"
+    filename = f"printScreen_{EMPLOYEE_ID}_{now.strftime('%Y-%m-%d_%H-%M-%S')}.png"
     file_path = os.path.join(SCREENSHOT_DIR, filename)
 
     try:
@@ -84,7 +85,7 @@ def upload_screenshot_and_log():
                 "employee_id": EMPLOYEE_ID,
                 "url": file_url,
                 "timestamp": now.strftime('%Y-%m-%d %H:%M:%S')
-            })
+            },headers=HEADERS)
 
             if res.status_code == 200:
                 print(f"[LOGGED] Screenshot URL: {file_url}")
@@ -100,10 +101,10 @@ def upload_screenshot_and_log():
 
     finally:
         # Safe file deletion with retry
-        for i in range(5):
+        for i in range(3):
             try:
                 os.remove(file_path)
-                print(f"🗑️ Deleted: {file_path}")
+                print(f"[PRINTSCREEN INFO] Deleted: {file_path}")
                 break
             except PermissionError as e:
                 print(f"[DELETE RETRY {i+1}] File in use: {e}")
@@ -118,7 +119,7 @@ def notify_admin(employee_id, event):
         res = requests.post(f"{API_BASE_URL}/employee/notify-suspicious", json={
             "employee_id": employee_id,
             "event": event,
-        })
+        },headers=HEADERS)
         if res.status_code == 200:
             print(f"[NOTIFY] {event} alert sent for Employee ID {employee_id}")
         else:
@@ -128,5 +129,5 @@ def notify_admin(employee_id, event):
 
 
 keyboard.add_hotkey('print screen', upload_screenshot_and_log)
-print("✅ PrintScreen detector running...")
+print("[INFO] PrintScreen detector running...")
 keyboard.wait()

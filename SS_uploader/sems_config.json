@@ -1,1 +1,4 @@
-{"id": 3, "name": "Arun shaw", "email": "qwerty@example.com", "password": "$2b$10$2S41OrDeST0PNnbZamudMulp/fhR9z59mScqzwtxOP.iDwaUXS5oe", "address": "21 jump street ", "salary": 9999, "image": "image_1750764671975.png", "category_id": 3}
+{
+  "id": 3,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiZW1wbG95ZWUiLCJlbWFpbCI6ImFydW5zaGF3MEBleGFtcGxlLmNvbSIsImlkIjozLCJpYXQiOjE3NTQwNTEyNjksImV4cCI6MTc1NDEzNzY2OX0.BlGDdJISLXh-yrd2EVMEFu6QDoBsKyGmNfxchfwMRrA"
+}

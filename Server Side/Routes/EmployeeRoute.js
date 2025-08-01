@@ -1,6 +1,6 @@
 import express from "express";
 import con from "../utils/db.js";
-
+import fs from "fs";
 import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -87,6 +87,32 @@ router.post("/start-sems", (req, res) => {
         .status(400)
         .json({ Status: false, message: "Script is already running" });
     }
+    // Create/update the config file with employee info and token
+    const config = {
+      id: req.id, // From verifyUser middleware
+      token: req.cookies.token, // The JWT token
+    };
+
+    // Write the config file
+    const configPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "SS_uploader",
+      "sems_config.json"
+    );
+    console.log("Writing config to:", configPath);
+
+    try {
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+      console.log("Config file written successfully");
+    } catch (writeError) {
+      console.error("Error writing config file:", writeError);
+      return res.status(500).json({
+        Status: false,
+        error: "Failed to write config file",
+      });
+    }
 
     pythonProcess = spawn(pythonExecutable, [scriptPath], {
       stdio: ["ignore", "pipe", "pipe"],
@@ -106,7 +132,7 @@ router.post("/start-sems", (req, res) => {
 
     res.status(200).json({
       Status: true,
-      message: "Python script started in background.",
+      message: "Screeshot moniotring script started in background.",
     });
   } catch (err) {
     console.error("Failed to launch script:", err);
@@ -125,7 +151,7 @@ router.post("/stop-sems", (req, res) => {
     process.kill(pythonProcess.pid); // Kill the process
     pythonProcess = null;
     res.status(200).json({ Status: true, message: "Python script stopped." });
-    console.log("🔴 SM is stopped")
+    console.log("🔴 SM is stopped");
   } catch (err) {
     console.error("Failed to stop script:", err);
     res.status(500).json({ Status: false, error: "Failed to stop script" });
@@ -191,20 +217,16 @@ router.post("/stop-printScreenDetection", (req, res) => {
   try {
     process.kill(printScreenProcess.pid); // Kill the process
     printScreenProcess = null;
-    res
-      .status(200)
-      .json({
-        Status: true,
-        message: "Print screen detection script stopped.",
-      });
+    res.status(200).json({
+      Status: true,
+      message: "Print screen detection script stopped.",
+    });
   } catch (err) {
     console.error("Failed to stop Print Screen Detection script:", err);
-    res
-      .status(500)
-      .json({
-        Status: false,
-        error: "Failed to Print Screen Detection script",
-      });
+    res.status(500).json({
+      Status: false,
+      error: "Failed to Print Screen Detection script",
+    });
   }
 });
 
@@ -254,7 +276,7 @@ router.post("/stop-usb", (req, res) => {
     process.kill(usbProcess.pid);
     usbProcess = null;
     res.status(200).json({ Status: true, message: "USB script stopped" });
-    console.log("🔴 USB script stopped")
+    console.log("🔴 USB script stopped");
   } catch (err) {
     console.error("Failed to stop USB script:", err);
     res.status(500).json({ Status: false, error: "Failed to stop USB script" });
@@ -277,7 +299,7 @@ router.post("/notify-suspicious", async (req, res) => {
     io.emit("suspicious-activity", {
       employee_id,
       event,
-      timestamp
+      timestamp,
     });
 
     res.status(200).json({ success: true });
@@ -287,16 +309,22 @@ router.post("/notify-suspicious", async (req, res) => {
   }
 });
 
-const ipDetectionScriptPath = path.join(__dirname,"../../SS_uploader/ipDetection.py")
-let ipDetectionProcess = null
+const ipDetectionScriptPath = path.join(
+  __dirname,
+  "../../SS_uploader/ipDetection.py"
+);
+let ipDetectionProcess = null;
 
 router.post("/start-ipDetection", (req, res) => {
   try {
     if (ipDetectionProcess) {
-      console.log("Ipdetection already running")
+      console.log("Ipdetection already running");
       return res
         .status(400)
-        .json({ Status: false, message: "ip detection script already running" });
+        .json({
+          Status: false,
+          message: "ip detection script already running",
+        });
     }
     ipDetectionProcess = spawn(pythonExecutable, [ipDetectionScriptPath], {
       stdio: ["ignore", "pipe", "pipe"],
@@ -318,15 +346,12 @@ router.post("/start-ipDetection", (req, res) => {
     });
     ipDetectionProcess.unref();
 
-    res.json({ Status: true, message: "🟢IP detecion script is runing" })
-
-
+    res.json({ Status: true, message: "🟢IP detecion script is runing" });
   } catch (error) {
-    console.log("Error in starting the Ip script: ", error)
+    console.log("Error in starting the Ip script: ", error);
     res.status(500).json({ Status: false, error: "Ip Script launch failed." });
-
   }
-})
+});
 
 router.post("/stop-ipDetection", (req, res) => {
   if (!ipDetectionProcess) {
@@ -338,13 +363,39 @@ router.post("/stop-ipDetection", (req, res) => {
   try {
     process.kill(ipDetectionProcess.pid);
     ipDetectionProcess = null;
-    res.status(200).json({ Status: true, message: "🔴 IP Detection script stopped" });
+    res
+      .status(200)
+      .json({ Status: true, message: "🔴 IP Detection script stopped" });
     console.log("🔴 IP Detection script stopped");
   } catch (err) {
     console.error("Failed to stop IP Detection script:", err);
     res
       .status(500)
       .json({ Status: false, error: "Failed to stop IP Detection script" });
+  }
+});
+
+
+router.post("/heartbeat", (req, res) => {
+  try {
+    const { employee_id, script } = req.body;
+
+    if (!employee_id || !script) {
+      return res.status(400).json({ success: false, message: "Missing fields" });
+    }
+
+    const timestamp = new Date().toISOString();
+
+    // You could log this to DB or just keep in memory or cache (e.g., Redis)
+    console.log(`[HEARTBEAT] ${script} from Employee ID ${employee_id} at ${timestamp}`);
+
+    // Optional: Insert into a database if you want a log trail
+    // con.query("INSERT INTO heartbeats (...) VALUES (...)", ...)
+
+    return res.status(200).json({ success: true, timestamp });
+  } catch (error) {
+    console.error("💥 Heartbeat error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

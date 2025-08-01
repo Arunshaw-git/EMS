@@ -9,6 +9,7 @@ import time
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
+
 active_sessions = {}  # {domain: {'last_seen': datetime, 'notified': True}}
 
 SESSION_TIMEOUT = timedelta(minutes=3)  # Consider the session inactive if no packet seen for 3 minutes
@@ -24,11 +25,11 @@ def update_session_flag(active: bool):
     except Exception as e:
         print(f"[FLAG ERROR] Could not write session_flag.json: {e}")
 
+
 def background_session_cleanup():
     while True:
         cleanup_inactive_sessions()
         time.sleep(5)  # Check every 5 seconds
-
 
 def get_root_domain(host):
     parts = host.split('.')
@@ -78,20 +79,17 @@ def cleanup_inactive_sessions():
         update_session_flag(False)
 
 
-
 def log_session_start(domain, start_time):
     default_end = start_time + timedelta(minutes=3)
-
     payload = {
         "employee_id": EMPLOYEE_ID,
         "domain": domain,
         "start_time": start_time.strftime("%Y-%m-%d %H:%M:%S"),
         "end_time": default_end.strftime("%Y-%m-%d %H:%M:%S")  # default end_time
-
     }
 
     try:
-        res = requests.post("http://localhost:3000/admin/start_social_media_session", json=payload)
+        res = requests.post("http://localhost:3000/admin/start_social_media_session", json=payload,headers=HEADERS)
         if res.status_code == 200:
             log_id = res.json().get("log_id")
             print(f"[SESSION STARTED] {domain} (ID: {log_id})")
@@ -160,9 +158,10 @@ if os.name == "nt":
 from pytlssniff import TLSHandshakeSniffer  # Assuming __init__.py exposes this
 
 with open(CONFIG_PATH, 'r') as f:
-    emp = json.load(f)
-EMPLOYEE_ID = emp["id"]
-EMPLOYEE_NAME = emp["name"]
+    config = json.load(f)
+EMPLOYEE_ID = config["id"]
+#EMPLOYEE_NAME = emp["name"]
+HEADERS = {'Authorization': f'Bearer {config["token"]}'}
 
 def notify(event,employee_id=EMPLOYEE_ID):
     payload = {
@@ -170,7 +169,7 @@ def notify(event,employee_id=EMPLOYEE_ID):
         "event": f"{event} opened "
     }
     try:
-        res = requests.post("http://localhost:3000/employee/notify-suspicious",json=payload)
+        res = requests.post("http://localhost:3000/employee/notify-suspicious",json=payload,header=HEADERS)
         if  res.status_code == 200:
             print(f"[NOTIFY] Social meda webiste connected : {event} alert sent for Employee ID {employee_id}")
         else:
