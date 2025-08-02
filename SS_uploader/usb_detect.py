@@ -7,6 +7,8 @@ import time
 import pythoncom
 import signal
 import sys
+from HeartBeatChecker import HeartbeatChecker
+import schedule 
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'sems_config.json')
 API_BASE_URL = "http://localhost:3000"
@@ -25,6 +27,13 @@ with open(CONFIG_PATH, 'r') as f:
 EMPLOYEE_ID = config["id"]
 HEADERS = {'Authorization': f'Bearer {config["token"]}'}
 #EMPLOYEE_NAME = config["name"]
+
+heartbeat = HeartbeatChecker(
+    api_base_url=API_BASE_URL,
+    employee_id=EMPLOYEE_ID,
+    headers=HEADERS,
+    script_name="usb_detect.py",
+)
 
 print("[USB] USB Detection script running on Windows...")
 
@@ -55,7 +64,9 @@ def notify_admin(employee_id, event):
     except Exception as e:
         print(f"[NOTIFY EXCEPTION] {e}")
 
-while True:
+schedule.every(3).seconds.do(heartbeat.send)
+
+while not heartbeat.should_shutdown():
     try:
         inserted = watcher_insert(timeout_ms=1000)
         if inserted:
@@ -85,6 +96,7 @@ while True:
 
     except wmi.x_wmi_timed_out:
         pass
-
+    schedule.run_pending()
+    time.sleep(0.5)
 
 

@@ -1,5 +1,3 @@
-# SS_uploader/heartbeat.py
-
 import requests
 from datetime import datetime as dt
 
@@ -20,6 +18,7 @@ class HeartbeatChecker:
         return self.shutdown_flag
 
     def send(self):
+        print("[HEARTBEAT] Sending heartbeat...")
         try:
             res = requests.post(
                 f"{self.api_base_url}/employee/heartbeat",

@@ -14,6 +14,8 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseUpload
 from google.auth.transport.requests import Request
 
+from HeartBeatChecker import HeartbeatChecker
+import schedule
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'sems_config.json')
 API_BASE_URL = "http://localhost:3000"
@@ -34,6 +36,12 @@ with open(CONFIG_PATH, 'r') as f:
 EMPLOYEE_ID = config["id"]
 #EMPLOYEE_NAME = emp["name"]
 HEADERS = {'Authorization': f'Bearer {config["token"]}'}  # Format it as Bearer token
+heartbeat= HeartbeatChecker(
+    api_base_url=API_BASE_URL,
+    employee_id=EMPLOYEE_ID,
+    headers=HEADERS,
+    script_name="printScreen.py",
+)
 
 def authenticate_drive():
     creds = None
@@ -127,7 +135,22 @@ def notify_admin(employee_id, event):
     except Exception as e:
         print(f"[NOTIFY EXCEPTION] {e}")
 
+if __name__ == "__main__":
+    print("[INFO] PrintScreen detector starting...")
+    keyboard.add_hotkey('print screen', upload_screenshot_and_log)
+    schedule.every(heartbeat.interval).seconds.do(heartbeat.send)
+    try:
+        while not heartbeat.should_shutdown():
+            schedule.run_pending()
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("[EXIT] Manual or signal-based shutdown.")
 
-keyboard.add_hotkey('print screen', upload_screenshot_and_log)
-print("[INFO] PrintScreen detector running...")
-keyboard.wait()
+    # Cleanup
+    keyboard.unhook_all()
+    schedule.clear()
+
+    if heartbeat.should_shutdown():
+        print("[EXIT] Shutdown triggered by heartbeat failure.")
+    else:
+        print("[EXIT] Manual or signal-based shutdown.")

@@ -8,6 +8,8 @@ import requests
 import time
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
+from HeartBeatChecker import HeartbeatChecker
+import schedule
 
 
 active_sessions = {}  # {domain: {'last_seen': datetime, 'notified': True}}
@@ -163,6 +165,18 @@ EMPLOYEE_ID = config["id"]
 #EMPLOYEE_NAME = emp["name"]
 HEADERS = {'Authorization': f'Bearer {config["token"]}'}
 
+HEARTBEAT_INTERVAL = 3  # seconds
+HEARTBEAT_FAILURE_THRESHOLD = 3
+
+heartbeat = HeartbeatChecker(
+    api_base_url="http://localhost:3000",  # or your deployed server
+    employee_id=EMPLOYEE_ID,
+    headers=HEADERS,
+    script_name="ipDetection.py",
+    interval=HEARTBEAT_INTERVAL,
+    failure_threshold=HEARTBEAT_FAILURE_THRESHOLD
+)
+
 def notify(event,employee_id=EMPLOYEE_ID):
     payload = {
         "employee_id":employee_id,
@@ -176,8 +190,6 @@ def notify(event,employee_id=EMPLOYEE_ID):
             print(f"[NOTIFY ERROR] {res.status_code} – {res.text}")
     except Exception as e:
         print(f"[NOTIFY EXCEPTION] {e}")
-
-            
 
 def get_tshark_interfaces():
     try:
@@ -212,22 +224,25 @@ def start_tls_sniffer(interface_name):
         "whatsapp.com", "telegram.org", "messenger.com"
     ]
     sniffer = TLSHandshakeSniffer(interface=interface_name)
-    while True:
+
+    while not heartbeat.should_shutdown():
         for packet in sniffer.listen(sniff_sni=True):
+            if heartbeat.should_shutdown():  # Check during inner loop
+                print("[SHUTDOWN] Detected from heartbeat")
+                return
             if packet and packet.sni:
                 sni_lower = packet.sni.lower()
                 root_domain = get_root_domain(sni_lower)
 
-                # 👇 only log if it's in the watchlist
+                #  only log if it's in the watchlist
                 if root_domain in watchlist:
                     print(f"[SESSION STARTED] {root_domain}")
-
                     session_status = update_sessions(root_domain)
                     if session_status == 'new':
                         notify(event=root_domain)
                         print(f"[SESSION STARTED] {root_domain}")
         cleanup_inactive_sessions()
- 
+        time.sleep(1) 
 
 def detect_active_interface():
     stats = psutil.net_if_stats()
@@ -251,6 +266,11 @@ def match_interface_with_tshark(active_ifaces, tshark_list):
                 return extract_interface_name(line)
     return None
 
+def run_heartbeat():
+    while not heartbeat.should_shutdown():
+        schedule.run_pending()
+        time.sleep(1)
+
 if __name__ == "__main__":
     update_session_flag(False)  
     tshark_interfaces = get_tshark_interfaces()
@@ -262,6 +282,9 @@ if __name__ == "__main__":
     print(f"[DEBUG] Active OS Interfaces: {active_ifaces}")
 
     interface_name = match_interface_with_tshark(active_ifaces, tshark_interfaces)
+    schedule.every(HEARTBEAT_INTERVAL).seconds.do(heartbeat.send)
+    threading.Thread(target=run_heartbeat, daemon=True).start()
+
     if not interface_name:
         print("[WARN] No active match found. Falling back to first interface.")
         interface_name = extract_interface_name(tshark_interfaces[0])
@@ -272,4 +295,8 @@ if __name__ == "__main__":
 
     start_tls_sniffer(interface_name=interface_name)
 
+if heartbeat.should_shutdown():
+    print("[EXIT] Shutdown triggered by heartbeat failure.")
+else:
+    print("[EXIT] Manual or signal-based shutdown.")
 
